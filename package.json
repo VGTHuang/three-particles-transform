@@ -1,0 +1,27 @@
+{
+  "name": "three-particles-transform",
+  "version": "1.0.0",
+  "description": "A particle transformation effect with three.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "webpack-dev-server --open",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VGTHuang/three-particles-transform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VGTHuang/three-particles-transform/issues"
+  },
+  "homepage": "https://github.com/VGTHuang/three-particles-transform#readme",
+  "devDependencies": {
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
