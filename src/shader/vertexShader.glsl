@@ -1,9 +1,6 @@
-uniform float time;
+uniform mat4 rotateMatrix;
 attribute float randomize;
-// attribute vec4 position;
-attribute vec4 pA;
-attribute vec4 pB;
-attribute vec4 pC;
+{0}
 varying float existence; // whether particle exist or not
 
 float nearSize = 10.0;
@@ -21,7 +18,9 @@ float getSize(float z) {
 }
 
 void main() {
-    vec4 newPosition = vec4(pA)*time + vec4(position,1)*(1.0-time);
+    vec4 newPosition = rotateMatrix*(
+{1}
+    );
     vec4 frustumPos = modelViewMatrix * vec4(vec3(newPosition), 1.0);
     gl_Position = projectionMatrix * frustumPos;
     gl_PointSize = getSize(frustumPos.z) * newPosition.w;

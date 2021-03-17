@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import axios from "axios";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { getShader } from "./shader/index";
+import { getShader, getShaderWithAttrs } from "./shader/index";
 var _ = require('lodash');
 
 var positionBufferNames = ["pA", "pB", "pC", "pD", "pE", "pF", "pG", "pH"]
@@ -52,9 +52,9 @@ function createParticlesInScene(scene, modelUrls) {
     var vertexBuffers = [];
     var randomizeBuffer = [];
 
-    modelUrls.forEach(url => {
+    modelUrls.forEach((url, urlIndex) => {
         let p = loadModel(url).then(result => {
-            allVertices.push(result);
+            allVertices[urlIndex] = result;
         });
         promises.push(p);
     })
@@ -75,6 +75,7 @@ function createParticlesInScene(scene, modelUrls) {
                 }
             })
             positionBufferNames[maxVerticesCountIndex] = "position";
+            positionBufferNames.length = allVertices.length;
             console.log(positionBufferNames);
             
             // push data to each buffer
@@ -108,12 +109,31 @@ function createParticlesInScene(scene, modelUrls) {
                 );
             })
             geo.setAttribute("randomize", new THREE.Float32BufferAttribute(randomizeBuffer, 1));
-    
+            
+            // traverse through positionBufferNames to do 2 things:
+            // 1. set uniforms; each position buffer needs to be assigned with a weight
+            //    to operate the interpolation
+            // 2. generate a dynamic vertex shader
+            var uniforms = {
+                rotateMatrix: { value: new THREE.Matrix4() }
+            };
+            var attr1 = ""; // dynamic v shader: an attribute and uniform for each position
+            var attr2 = ""; // dynamic v shader: calculate the interpolated position with weights
+            positionBufferNames.forEach(name => {
+                uniforms[name + "Weight"] = {
+                    value: 0.0
+                };
+                if(name != "position") {
+                    attr1 += `attribute vec4 ${name};\nuniform float ${name}Weight;\n`;
+                    attr2 += `        ${name} * ${name}Weight +\n`
+                }
+            });
+            attr1 += `uniform float positionWeight;\n`;
+            attr2 += `        vec4(position, 1.0) * positionWeight`
+
             const mat = new THREE.ShaderMaterial({
-                uniforms: {
-                      time: { value: 0.0 },
-                },
-                vertexShader: getShader("vertexShader"),
+                uniforms: uniforms,
+                vertexShader: getShaderWithAttrs("vertexShader", [attr1, attr2]),
                 fragmentShader: getShader("fragmentShader"),
                 blending: THREE.AdditiveBlending,
                 depthTest: false,
@@ -132,4 +152,4 @@ function createParticlesInScene(scene, modelUrls) {
 
 }
 
-export { createParticlesInScene };
+export { positionBufferNames, createParticlesInScene };

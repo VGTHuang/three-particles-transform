@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import Stats from "three/examples/jsm/libs/stats.module.js";
-import { createParticlesInScene } from "./particleGenerator.js";
+import { positionBufferNames, createParticlesInScene } from "./particleGenerator.js";
 
 // container
 const container = document.createElement("div");
@@ -17,6 +17,7 @@ const camera = new THREE.PerspectiveCamera(
     1,
     10000
 );
+camera.position.z = 300;
 
 // scene
 const scene = new THREE.Scene();
@@ -35,19 +36,25 @@ function onWindowResize() {
 }
 
 var timeCount = 0;
-var rotateSpeed = 0.03;
-var camDist = 300;
-var interpolateVal = 0.0;
-var interpolateDir = -1;
-var a = 5;
-var atanA = Math.atan(a);
+var rotateAxis = new THREE.Vector3(0, 1, 0);
+var rotateSpeed = 0.015;
+var rotateMatrix = new THREE.Matrix4();
 
+// physics
+
+/**
+ * generate some physics params for v shader interpolation
+ */
+function genPhysics() {
+
+}
 
 function render() {
+    // rotate
     let angle = (Math.PI * 2 * timeCount) / 100;
-    camera.position.x = Math.sin(angle) * camDist;
-    camera.position.z = Math.cos(angle) * camDist;
-
+    rotateMatrix.makeRotationAxis(rotateAxis, angle);
+    material.uniforms.rotateMatrix.value.copy(rotateMatrix);
+    
     // calc interpolate factor
     let interpolate = Math.sin(angle*5) * 1.1;
     if(interpolate > 1.0) {
@@ -56,11 +63,10 @@ function render() {
     else if(interpolate < -1.0) {
         interpolate = -1.0;
     }
-    interpolate *= a;
-    interpolate = (Math.atan(interpolate) / atanA + 1) / 2;
+    interpolate = interpolate * 0.5 + 0.5;
 
-
-    material.uniforms.time.value = interpolate;
+    material.uniforms[positionBufferNames[0]+"Weight"].value = interpolate;
+    material.uniforms[positionBufferNames[2]+"Weight"].value = 1 - interpolate;
 
     camera.lookAt(scene.position);
 
@@ -102,14 +108,15 @@ var material = undefined;
 var particles = undefined;
 var modelUrls = [
     "/dist/models/cube1.txt",
-    "/dist/models/sphere1.txt",
-    "/dist/models/torus.txt"
+    "/dist/models/torus.txt",
+    "/dist/models/sphere1.txt"
 ]
 
 // get coords of each model and generate particles
 createParticlesInScene(scene, modelUrls).then((res) => {
     particles = res.object;
     material = res.material;
+    genPhysics(modelUrls.len);
     animate();
 });
 
