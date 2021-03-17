@@ -1,4 +1,8 @@
-varying vec3 vColor;
+varying float existence; // whether particle exist or not
+
 void main() {
-   gl_FragColor = vec4(0,1.0,0,1.0);
+   if(existence <= 0.0) {
+      discard;
+   }
+   gl_FragColor = vec4(1.0, 1.0, 1.0, existence);
 }

@@ -39,19 +39,26 @@ var rotateSpeed = 0.03;
 var camDist = 300;
 var interpolateVal = 0.0;
 var interpolateDir = -1;
+var a = 5;
+var atanA = Math.atan(a);
+
 
 function render() {
     let angle = (Math.PI * 2 * timeCount) / 100;
     camera.position.x = Math.sin(angle) * camDist;
     camera.position.z = Math.cos(angle) * camDist;
 
-    let interpolate = Math.sin(angle*3) * 0.6 + 0.5;
+    // calc interpolate factor
+    let interpolate = Math.sin(angle*5) * 1.1;
     if(interpolate > 1.0) {
         interpolate = 1.0;
     }
-    else if(interpolate < 0.0) {
-        interpolate = 0.0;
+    else if(interpolate < -1.0) {
+        interpolate = -1.0;
     }
+    interpolate *= a;
+    interpolate = (Math.atan(interpolate) / atanA + 1) / 2;
+
 
     material.uniforms.time.value = interpolate;
 
@@ -63,21 +70,44 @@ function render() {
     timeCount %= 100;
 }
 
+var isAnimate = true;
+var myReq = null;
+
 function animate() {
-    requestAnimationFrame(animate);
+    myReq = requestAnimationFrame(animate);
 
     render();
     stats.update();
 }
+
+function stopAnimate() {
+    cancelAnimationFrame(myReq);
+}
+
+document.getElementById("toggle-btn").addEventListener("click", () => {
+    if(isAnimate) {
+        isAnimate = false;
+        stopAnimate();
+    }
+    else {
+        isAnimate = true;
+        animate();
+    }
+})
 
 window.addEventListener("resize", onWindowResize);
 window.addEventListener("wheel", windowWheel);
 
 var material = undefined;
 var particles = undefined;
+var modelUrls = [
+    "/dist/models/cube1.txt",
+    "/dist/models/sphere1.txt",
+    "/dist/models/torus.txt"
+]
 
-// generate a cube
-createParticlesInScene(scene).then((res) => {
+// get coords of each model and generate particles
+createParticlesInScene(scene, modelUrls).then((res) => {
     particles = res.object;
     material = res.material;
     animate();
