@@ -44,7 +44,7 @@ function loadModel(url) {
     });
 }
 
-function createParticlesInScene(scene, modelUrls) {
+function createParticlesInScene(scene, modelUrlList) {
 
     var promises = [];
 
@@ -52,7 +52,7 @@ function createParticlesInScene(scene, modelUrls) {
     var vertexBuffers = [];
     var randomizeBuffer = [];
 
-    modelUrls.forEach((url, urlIndex) => {
+    modelUrlList.forEach((url, urlIndex) => {
         let p = loadModel(url).then(result => {
             allVertices[urlIndex] = result;
         });
@@ -76,7 +76,6 @@ function createParticlesInScene(scene, modelUrls) {
             })
             positionBufferNames[maxVerticesCountIndex] = "position";
             positionBufferNames.length = allVertices.length;
-            console.log(positionBufferNames);
             
             // push data to each buffer
             allVertices.forEach(vertices => {
@@ -125,11 +124,11 @@ function createParticlesInScene(scene, modelUrls) {
                 };
                 if(name != "position") {
                     attr1 += `attribute vec4 ${name};\nuniform float ${name}Weight;\n`;
-                    attr2 += `        ${name} * ${name}Weight +\n`
+                    attr2 += `        ${name} * randomizeWeight(${name}Weight) +\n`
                 }
             });
             attr1 += `uniform float positionWeight;\n`;
-            attr2 += `        vec4(position, 1.0) * positionWeight`
+            attr2 += `        vec4(position, 1.0) * randomizeWeight(positionWeight)`
 
             const mat = new THREE.ShaderMaterial({
                 uniforms: uniforms,

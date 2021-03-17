@@ -8,6 +8,30 @@ float near = -50.0;
 float farSize = 1.0;
 float far = -400.0;
 
+float randomizeWeight(float weight) {
+    float r = randomize * 0.4;
+    float a = sqrt(0.5) / (0.5 - r);
+    float b = a * r;
+    if(weight < 0.5) {
+        if(weight < r) {
+            return 0.0;
+        }
+        else {
+            float s = weight * a - b;
+            return s * s;
+        }
+    }
+    else {
+        if(weight > 1.0 - r) {
+            return 1.0;
+        }
+        else {
+            float s = (1.0 - weight) * a - b;
+            return 1.0 - s * s;
+        }
+    }
+}
+
 float getSize(float z) {
     if(z > near) {
         return nearSize;
