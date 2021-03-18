@@ -62,10 +62,8 @@ function onWindowResize() {
 }
 
 var timeCount = 0;
-var rotateAxis = new THREE.Vector3(0, 1, 0);
 var rotateSpeed = 0.015;
-var rotateMatrix = new THREE.Matrix4();
-var transitionSpeed = 0.01;
+var transitionSpeed = 0.008;
 
 // ***smooth transition***
 // each one is an n-dimension vector (n = numbers of models)
@@ -185,11 +183,6 @@ function updateShaderWeights() {
 }
 
 function render() {
-    // rotate
-    // let angle = (Math.PI * 2 * timeCount) / 100;
-    // rotateMatrix.makeRotationAxis(rotateAxis, angle);
-    // material.uniforms.rotateMatrix.value.copy(rotateMatrix);
-
     updateTransition();
     updateCameraPos();
 

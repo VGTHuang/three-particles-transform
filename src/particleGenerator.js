@@ -116,23 +116,32 @@ function createParticlesInScene(scene, modelUrlList) {
             var uniforms = {
                 rotateMatrix: { value: new THREE.Matrix4() }
             };
-            var attr1 = ""; // dynamic v shader: an attribute and uniform for each position
-            var attr2 = ""; // dynamic v shader: calculate the interpolated position with weights
+            var attr0 = ""; // dynamic v shader: an attribute and uniform for each position
+            var attr1 = ""; // dynamic v shader: randomized weights
+            var attr2 = ""; // dynamic v shader: calculate the norm2 length of weights
+            var attr3 = ""; // dynamic v shader: calculate randomized weights
+            var attr4 = ""; // dynamic v shader: an attribute and uniform for each position
             positionBufferNames.forEach(name => {
                 uniforms[name + "Weight"] = {
                     value: 0.0
                 };
                 if(name != "position") {
-                    attr1 += `attribute vec4 ${name};\nuniform float ${name}Weight;\n`;
-                    attr2 += `        ${name} * randomizeWeight(${name}Weight) +\n`
+                    attr0 += `attribute vec4 ${name};\nuniform float ${name}Weight;\n`;
+                    attr1 += `float randomized${name}Weight;\n`;
+                    attr2 += `    weightSum += randomized${name}Weight * randomized${name}Weight;\n`
+                    attr3 += `        randomized${name}Weight = randomizeWeight(${name}Weight);\n`
+                    attr4 += `        ${name} * randomized${name}Weight +\n`
                 }
             });
-            attr1 += `uniform float positionWeight;\n`;
-            attr2 += `        vec4(position, 1.0) * randomizeWeight(positionWeight)`
+            attr0 += "uniform float positionWeight;\n";
+            attr1 += "float randomizedpositionWeight;\n";
+            attr2 += "    weightSum += randomizedpositionWeight * randomizedpositionWeight;\n";
+            attr3 += "        randomizedpositionWeight = randomizeWeight(positionWeight);\n";
+            attr4 += "        vec4(position, 1.0) * randomizeWeight(positionWeight)";
 
             const mat = new THREE.ShaderMaterial({
                 uniforms: uniforms,
-                vertexShader: getShaderWithAttrs("vertexShader", [attr1, attr2]),
+                vertexShader: getShaderWithAttrs("vertexShader", [attr0, attr1, attr2, attr3, attr4]),
                 fragmentShader: getShader("fragmentShader"),
                 blending: THREE.AdditiveBlending,
                 depthTest: false,
