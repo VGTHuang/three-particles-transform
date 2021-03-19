@@ -1,26 +1,5 @@
 import { startScene, transformModel } from "./scene.js";
 
-var modelUrlList = [
-    "/models/heracles.txt",
-    "/models/gaul.txt",
-    "/models/baronesse.txt",
-];
-
-var modelInfo = [
-    {
-        name: "Herakles",
-        museum: "Nye Carlsberg Glyptotek",
-    },
-    {
-        name: "Dying Gaul",
-        museum: "Musei Capitolini",
-    },
-    {
-        name: "Baronesse Sipiere",
-        museum: "Ny Carlsberg Glyptotek",
-    },
-];
-
 var selectedModelIndex = 0;
 
 var modelInfoEls = [];
